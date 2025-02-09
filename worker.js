@@ -50,21 +50,20 @@ let bestHand;
 // sleep(ms);
 
 function initialize(state) {
-  thisHand = new Hand({
-    hands: state.hands,
-    TheFlint: state.TheFlint,
-    PlasmaDeck: state.PlasmaDeck,
-    Observatory: state.Observatory
-  });
+  try {
+    if (!state) throw new Error('Invalid state provided');
+    
+    thisHand = new Hand({
+      hands: state.hands,
+      TheFlint: state.TheFlint,
+      PlasmaDeck: state.PlasmaDeck,
+      Observatory: state.Observatory
+    });
 
-  taskID = state.taskID;
-  cards = state.cards;
-  jokers = state.jokers;
-  optimizeCards = state.optimizeCards;
-  minimize = state.minimize;
-  optimizeMode = state.optimizeMode;
-  bestHand = state.bestHand;
-  workerID = state.workerID;
+    ({ taskID, cards, jokers, optimizeCards, minimize, optimizeMode, bestHand, workerID } = state);
+  } catch (error) {
+    postMessage(['error', error.message]);
+  }
 }
 
 function run(jokers = [[]]) {
