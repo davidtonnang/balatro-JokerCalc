@@ -679,11 +679,10 @@ function redrawPlayfieldHTML() {
 
   txt = '';
   for(let id of bestHand) {
-    txt += `<div class="tooltip"><div id="p${id}" class="playfieldCard${playfieldCards[id].string} onclick="removeCard('${id}')" onmousemove = 'hoverCard(event)' onmouseout = 'noHoverCard(event)'></div>` +
+    txt += `<div class="tooltip"><div id="p${id}" class="playfieldCard${playfieldCards[id].string} onclick="moveCardUp('${id}')" onmousemove = 'hoverCard(event)' onmouseout = 'noHoverCard(event)'></div>` +
     `<div style="position: absolute; top: 100%; width: 100%;">` +
     `<div class="positionButtons">` +
     `<div class="lvlBtn" onclick="moveHandCardLeft('${id}')">&lt;</div>` +
-    `<div class="lvlBtn" onclick="moveHandCardDown('${id}')">v</div>` +
     `<div class="lvlBtn" onclick="moveHandCardRight('${id}')">&gt;</div>` +
     `</div></div>` +
     `</div>`;
@@ -697,7 +696,7 @@ function redrawPlayfieldHTML() {
   for(let id of Object.keys(playfieldCards).sort().reverse()) {
     if(bestHand.indexOf(id) >= 0) continue;
     if(id.indexOf('99') !== 0) continue;
-    txt += `<div class="tooltip"><div id="${id}" class="playfieldCard${playfieldCards[id].string} onclick="removeCard('${id}')" onmousemove = 'hoverCard(event)' onmouseout = 'noHoverCard(event)'></div>` +
+    txt += `<div class="tooltip"><div id="${id}" class="playfieldCard${playfieldCards[id].string} onclick="moveCardUp('${id}')" onmousemove = 'hoverCard(event)' onmouseout = 'noHoverCard(event)'></div>` +
     `<div style="position: absolute; top: 100%; width: 100%;">` +
     `<div class="positionButtons">` +
     `<div class="lvlBtn" onclick="moveCardUp('${id}')">^</div>` +
@@ -753,7 +752,7 @@ function redrawPlayfieldHTML() {
         if(lowestCards.indexOf(id) < 0) continue;
         if(id === ignoreCard) continue;
         if(id.indexOf('99') === 0) continue;
-        txt += `<div class="tooltip"><div id="${id}" class="playfieldCard${playfieldCards[id].string} onclick="removeCard('${id}')" onmousemove = 'hoverCard(event)' onmouseout = 'noHoverCard(event)'></div>` +
+        txt += `<div class="tooltip"><div id="${id}" class="playfieldCard${playfieldCards[id].string} onclick="moveCardUp('${id}')" onmousemove = 'hoverCard(event)' onmouseout = 'noHoverCard(event)'></div>` +
         `<div style="position: absolute; top: 100%; width: 100%;">` +
         `<div class="positionButtons">` +
         `<div class="lvlBtn" onclick="moveCardUp('${id}')">^</div>` +
@@ -761,7 +760,7 @@ function redrawPlayfieldHTML() {
         `</div>`;
       }
 
-      txt += `<div class="tooltip"><div id="${ignoreCard}" class="playfieldCard${playfieldCards[ignoreCard].string} onclick="removeCard('${ignoreCard}')" onmousemove = 'hoverCard(event)' onmouseout = 'noHoverCard(event)'></div>` +
+      txt += `<div class="tooltip"><div id="${ignoreCard}" class="playfieldCard${playfieldCards[ignoreCard].string} onclick="moveCardUp('${ignoreCard}')" onmousemove = 'hoverCard(event)' onmouseout = 'noHoverCard(event)'></div>` +
       `<div style="position: absolute; top: 100%; width: 100%;">` +
       `<div class="positionButtons">` +
       `<div class="lvlBtn" onclick="moveCardUp('${ignoreCard}')">^</div>` +
@@ -775,7 +774,7 @@ function redrawPlayfieldHTML() {
     if(bestHand.indexOf(id) >= 0) continue;
     if(lowestCards.indexOf(id) >= 0) continue;
     if(id.indexOf('99') === 0) continue;
-    txt += `<div class="tooltip"><div id="${id}" class="playfieldCard${playfieldCards[id].string} onclick="removeCard('${id}')" onmousemove = 'hoverCard(event)' onmouseout = 'noHoverCard(event)'></div>` +
+    txt += `<div class="tooltip"><div id="${id}" class="playfieldCard${playfieldCards[id].string} onclick="moveCardUp('${id}')" onmousemove = 'hoverCard(event)' onmouseout = 'noHoverCard(event)'></div>` +
     `<div style="position: absolute; top: 100%; width: 100%;">` +
     `<div class="positionButtons">` +
     `<div class="lvlBtn" onclick="moveCardUp('${id}')">^</div>` +
@@ -840,15 +839,13 @@ function moveHandCardRight(id) {
   redrawPlayfield();
 }
 
-function moveHandCardDown(id) {
-  if(optimizeCards) toggleCard();
-  bestHand.splice(bestHand.indexOf(id), 1);
-  redrawPlayfield();
-}
-
 function moveCardUp(id) {
   if(optimizeCards) toggleCard();
-  if(bestHand.length < 5) {
+  // Check if card is already in bestHand - if so, move it back down
+  if(bestHand.includes(id)) {
+    bestHand.splice(bestHand.indexOf(id), 1);
+  } else if(bestHand.length < 5) {
+    // Only add to bestHand if not already there and hand isn't full
     bestHand.push(id);
   }
   redrawPlayfield();
