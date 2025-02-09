@@ -700,17 +700,18 @@ function redrawPlayfieldHTML() {
   txt = '';
 
   // Draw cards in hand
-  for(let id in playfieldCards) {
-    // Skip if this specific card ID is in bestHand
-    if(bestHand.includes(id)) continue;
-    
-    txt += `<div class="tooltip"><div id="${id}" class="playfieldCard${playfieldCards[id].string} onclick="moveCardUp('${id}')" onmousemove = 'hoverCard(event)' onmouseout = 'noHoverCard(event)'></div>` +
-    `<div style="position: absolute; top: 100%; width: 100%;">` +
-    `<div class="positionButtons">` +
-    `<div class="lvlBtn" onclick="removeCard('${id}')">X</div>` +
-    `</div></div>` +
-    `</div>`;
-  }
+  // In the redrawPlayfieldHTML function:
+for(let id in playfieldCards) {
+  // Skip if this specific card ID is in bestHand
+  if(bestHand.includes(id)) continue;
+  
+  txt += `<div class="tooltip"><div id="${id}" class="playfieldCard${playfieldCards[id].string} onclick="moveCardUp('${id}')" onmousemove = 'hoverCard(event)' onmouseout = 'noHoverCard(event)'></div>` +
+  `<div class="removeplayfieldCard" onclick="removeCard('${id}')">X</div>` +
+  `<div style="position: absolute; top: 100%; width: 100%;">` +
+  `<div class="positionButtons">` +
+  `</div></div>` +
+  `</div>`;
+}
   cardsInHandDiv.innerHTML = txt;
 }
 

@@ -503,6 +503,14 @@ html {
   z-index: 3;
 }
 
+.playfieldCard:hover + .removeJoker + .tooltiptext,
+.playfieldCard:hover + .tooltiptext,
+.modifierCard:hover + .tooltiptext,
+.jmodifierCard:hover + .tooltiptext {
+  visibility: visible;
+  z-index: 3;
+}
+
 .title {
   font-size: 2em;
 	display: block;
@@ -687,6 +695,29 @@ input {
 }
 
 .removeJoker {
+  color: #fff0;
+  background-color: #f00;
+  position: relative;
+  margin-left: 20%;
+  margin-right: 20%;
+  border-radius: 5px;
+  cursor: pointer;
+  visibility: hidden;
+  height: 0%;
+  top: 20%;
+  transition: 0.2s;
+  padding-top: 8px;
+}
+
+.playfieldCard:hover + .removeplayfieldCard,
+.removeplayfieldCard:hover {
+  visibility: visible;
+  top: -40%;
+  height: 60%;
+  color: #fff;
+}
+
+.removeplayfieldCard {
   color: #fff0;
   background-color: #f00;
   position: relative;
