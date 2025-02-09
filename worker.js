@@ -260,21 +260,24 @@ function run(jokers = [[]]) {
   postMessage([taskID, bestScore, bestJokers, bestCards, bestCardsInHand, highestScore, lowestScore, thisHand.typeOfHand, normalizeBig(meanScore), normalizeBig(medianScore), workerID, thisHand.compiledValues]);
 }
 
-self.onmessage = async function(msg) {
-  switch (msg.data[0]) {
-    case "start":
-      initialize(msg.data[1]);
-      break;
-    case "once":
-      run([[]]);
-      break;
-    case "dontOptimizeJokers":
-      run([jokers]);
-      break;
-    case "optimizeJokers":
-      let permuted = permutations(jokers);
-      run(permuted.slice(msg.data[1], msg.data[2]));
-      break;
-    default:
+// Use object literal for message handling
+const messageHandlers = {
+  start: (data) => initialize(data),
+  once: () => run([[]]),
+  dontOptimizeJokers: () => run([jokers]),
+  optimizeJokers: (start, end) => {
+    const permuted = permutations(jokers);
+    run(permuted.slice(start, end));
   }
-}
+};
+
+self.onmessage = async function({ data: [type, ...args] }) {
+  const handler = messageHandlers[type];
+  if (handler) {
+    try {
+      await handler(...args);
+    } catch (error) {
+      postMessage(['error', error.message]);
+    }
+  }
+};
