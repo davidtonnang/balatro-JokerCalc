@@ -416,6 +416,7 @@ html {
   padding: 0;
   image-rendering: pixelated;
   cursor: pointer;
+  z-index: 2;
 }
 
 .chipIcon {
