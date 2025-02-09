@@ -619,10 +619,18 @@ function removeJoker(id) {
 }
 
 function addCard(i, j) {
-  let id = ((j === 10 && !modifiers.stone) ? (!modifiers.steel ? '993' : '992') : '') + (''+j).padStart(2, 0)+(4-i)+Object.keys(modifiers).map(a=>modifiers[a]?'1':'0').join('');
+  let baseId = ((j === 10 && !modifiers.stone) ? (!modifiers.steel ? '993' : '992') : '') + (''+j).padStart(2, 0)+(4-i)+Object.keys(modifiers).map(a=>modifiers[a]?'1':'0').join('');
+  let id = baseId;
+  let counter = 1;
+  
+  // Add a suffix to ensure uniqueness if this ID already exists
   while(playfieldCards.hasOwnProperty(id)) {
-    id += '#';
+    id = baseId + '_' + counter;
+    counter++;
   }
+
+  console.log('Adding card with ID:', id);
+  console.log('Current playfieldCards:', {...playfieldCards});
 
   playfieldCards[id] = {
     id,
@@ -691,89 +699,12 @@ function redrawPlayfieldHTML() {
 
   txt = '';
 
-  let lowestCards = [];
-
-  for(let id of Object.keys(playfieldCards).sort().reverse()) {
-    if(bestHand.indexOf(id) >= 0) continue;
-    if(id.indexOf('99') !== 0) continue;
-    txt += `<div class="tooltip"><div id="${id}" class="playfieldCard${playfieldCards[id].string} onclick="moveCardUp('${id}')" onmousemove = 'hoverCard(event)' onmouseout = 'noHoverCard(event)'></div>` +
-    `<div style="position: absolute; top: 100%; width: 100%;">` +
-    `<div class="positionButtons">` +
-    `<div class="lvlBtn" onclick="moveCardUp('${id}')">^</div>` +
-    `</div></div>` +
-    `</div>`;
-  }
-
-  // if Raised Fist, move the lowest cards to the left
-  if(Object.keys(playfieldJokers).reduce((a,b) => a || (playfieldJokers[b].type[0] === 2 && playfieldJokers[b].type[1] === 8 && !playfieldJokers[b].modifiers.disabled), false)) {
-    let lowest = 100;
-    let isQueen = true;
-    let type = 0;
-    for(let card in playfieldCards) {
-      if(!playfieldCards[card].modifiers.stone && bestHand.indexOf(card) < 0) {
-        if(lowest > cardValues[playfieldCards[card].type[1]] + (playfieldCards[card].type[1] === QUEEN ? 10 : 0)) {
-          isQueen = playfieldCards[card].type[1] === QUEEN;
-          lowest = cardValues[playfieldCards[card].type[1]] + (isQueen ? 10 : 0);
-          lowestCards = [card];
-          type = playfieldCards[card].type[1];
-        }
-        else if(lowest === cardValues[playfieldCards[card].type[1]]) {
-          lowestCards.push(card);
-        }
-      }
-    }
-
-    let index = 0;
-    let highScore = 0;
-    for(let i = 0; i < lowestCards.length; i++) {
-      const card = lowestCards[i];
-      if(!playfieldCards[card].modifiers.disabled) {
-        let thisScore = 1;
-        if(playfieldCards[card].modifiers.steel) {
-          thisScore += 2;
-        }
-        if(playfieldCards[card].modifiers.double) {
-          thisScore += 4;
-        }
-        if(thisScore > highScore) {
-          highScore = thisScore;
-          index = i;
-        }
-      }
-    }
-
-    ignoreCard = -1;
-
-    // only add cards if there is a valid lowest card
-    if(lowest > 0 && lowest < 100 && !isQueen) {
-      ignoreCard = lowestCards[index];
-
-      for(let id of Object.keys(playfieldCards).sort().reverse()) {
-        if(lowestCards.indexOf(id) < 0) continue;
-        if(id === ignoreCard) continue;
-        if(id.indexOf('99') === 0) continue;
-        txt += `<div class="tooltip"><div id="${id}" class="playfieldCard${playfieldCards[id].string} onclick="moveCardUp('${id}')" onmousemove = 'hoverCard(event)' onmouseout = 'noHoverCard(event)'></div>` +
-        `<div style="position: absolute; top: 100%; width: 100%;">` +
-        `<div class="positionButtons">` +
-        `<div class="lvlBtn" onclick="moveCardUp('${id}')">^</div>` +
-        `</div></div>` +
-        `</div>`;
-      }
-
-      txt += `<div class="tooltip"><div id="${ignoreCard}" class="playfieldCard${playfieldCards[ignoreCard].string} onclick="moveCardUp('${ignoreCard}')" onmousemove = 'hoverCard(event)' onmouseout = 'noHoverCard(event)'></div>` +
-      `<div style="position: absolute; top: 100%; width: 100%;">` +
-      `<div class="positionButtons">` +
-      `<div class="lvlBtn" onclick="moveCardUp('${ignoreCard}')">^</div>` +
-      `</div></div>` +
-      `</div>`;
-    }
-    //console.log(txt);
-  }
-
-  for(let id of Object.keys(playfieldCards).sort().reverse()) {
-    if(bestHand.indexOf(id) >= 0) continue;
-    if(lowestCards.indexOf(id) >= 0) continue;
+  // Draw cards in hand
+  for(let id in playfieldCards) {
+    // Skip if this specific card ID is in bestHand
+    if(bestHand.includes(id)) continue;
     if(id.indexOf('99') === 0) continue;
+    
     txt += `<div class="tooltip"><div id="${id}" class="playfieldCard${playfieldCards[id].string} onclick="moveCardUp('${id}')" onmousemove = 'hoverCard(event)' onmouseout = 'noHoverCard(event)'></div>` +
     `<div style="position: absolute; top: 100%; width: 100%;">` +
     `<div class="positionButtons">` +
@@ -841,7 +772,12 @@ function moveHandCardRight(id) {
 
 function moveCardUp(id) {
   if(optimizeCards) toggleCard();
-  // Check if card is already in bestHand - if so, move it back down
+  
+  console.log('Moving card with ID:', id);
+  console.log('Current bestHand:', [...bestHand]);
+  console.log('Current playfieldCards:', {...playfieldCards});
+
+  // Check if this specific card ID is already in bestHand
   if(bestHand.includes(id)) {
     bestHand.splice(bestHand.indexOf(id), 1);
   } else if(bestHand.length < 5) {
