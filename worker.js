@@ -1,49 +1,37 @@
 'use strict';
 importScripts('balatro-sim.js');
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-function choose(array, k) {
-  if (k === 0) {
-    return [[]];
-  }
+const choose = (array, k) => {
+  if (k === 0) return [[]];
+  
+  return array.flatMap((item, index) => 
+    choose(array.slice(index + 1), k - 1)
+      .map(combination => [item, ...combination])
+  );
+};
 
+const permutations = (inputArr) => {
   const results = [];
-
-  for (let i = 0; i < array.length; i++) {
-    const remaining = array.slice(i + 1);
-    const combinations = choose(remaining, k - 1);
-
-    for (const combination of combinations) {
-      results.push([array[i], ...combination]);
+  
+  const permute = (arr, memo = []) => {
+    if (arr.length === 0) {
+      results.push([...memo]);
+      return;
     }
-  }
-
+    
+    for (let i = 0; i < arr.length; i++) {
+      const current = arr[i];
+      arr.splice(i, 1);
+      permute(arr, [...memo, current]);
+      arr.splice(i, 0, current);
+    }
+  };
+  
+  permute([...inputArr]);
   return results;
-}
-
-function permutations(inputArr) {
-  var results = [];
-
-  function permute(arr, memo) {
-    var cur, memo = memo || [];
-
-    for (var i = 0; i < arr.length; i++) {
-      cur = arr.splice(i, 1);
-      if (arr.length === 0) {
-        results.push(memo.concat(cur));
-      }
-      permute(arr.slice(), memo.concat(cur));
-      arr.splice(i, 0, cur[0]);
-    }
-
-    return results;
-  }
-
-  return permute(inputArr);
-}
+};
 
 let taskID;
 let workerID;
